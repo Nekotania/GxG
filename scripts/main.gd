@@ -32,6 +32,7 @@ var cooldowns := {}
 var honk_count := 0
 var last_honk := 0.0
 var terror := 0.0
+var beat_tweens: Array[Tween] = []
 
 
 func _ready() -> void:
@@ -229,23 +230,43 @@ func _on_any_honk(g) -> void:
 
 # ---------------------------------------------------------------- dialogue
 
+## A tween that belongs to the current line of dialogue. Advancing the line snaps it to its end,
+## so skipping fast never leaves half-played animations (or late spawns) on screen.
+func beat_tween() -> Tween:
+	var tw := create_tween()
+	beat_tweens.append(tw)
+	return tw
+
+
+func finish_beats() -> void:
+	for tw in beat_tweens:
+		if tw.is_valid() and tw.is_running():
+			tw.custom_step(9999.0)
+	beat_tweens.clear()
+
+
+func say(speaker: String, text: String, color: Color, translation: String = "") -> void:
+	await ui.say(speaker, text, color, translation)
+	finish_beats()
+
+
 func narr(text: String) -> void:
-	await ui.say("", "[i]" + text + "[/i]", NARRATOR_COLOR)
+	await say("", "[i]" + text + "[/i]", NARRATOR_COLOR)
 
 
 func girl_says(text: String) -> void:
-	await ui.say(GIRL_NAME, text, GIRL_COLOR)
+	await say(GIRL_NAME, text, GIRL_COLOR)
 
 
 func derek_says(text: String) -> void:
-	await ui.say(EX_NAME, text, DEREK_COLOR)
+	await say(EX_NAME, text, DEREK_COLOR)
 
 
 func goose_says(honks: String, translation: String, g = null, speaker: String = "The Chosen Goose", color: Color = GOOSE_COLOR) -> void:
 	var who = g if g != null else goose
 	if who != null:
 		_honk_burst(who, honks.split(" ", false).size())
-	await ui.say(speaker, honks, color, translation)
+	await say(speaker, honks, color, translation)
 
 
 func _honk_burst(g, n: int) -> void:
@@ -385,7 +406,7 @@ func intro() -> void:
 	fg.fiery = true
 	fg.heading = PI * 0.5
 	fg.scale = Vector2.ZERO
-	var tw := create_tween()
+	var tw := beat_tween()
 	tw.tween_property(fg, "scale", Vector2(4, 4), 1.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(fg.honk)
 	await narr("...there was [b]Father Goose[/b].")
@@ -393,7 +414,7 @@ func intro() -> void:
 	var extras := []
 	for p in [Vector2(170, 140), Vector2(280, 250), Vector2(150, 360)]:
 		extras.append(pop_prop("angel", p))
-	var tw2 := create_tween()
+	var tw2 := beat_tween()
 	tw2.tween_interval(1.6)
 	tw2.tween_callback(func(): extras.append(pop_prop("devil", Vector2(980, 230))))
 	tw2.tween_interval(0.6)
@@ -406,7 +427,7 @@ func intro() -> void:
 	await wait(0.5)
 	face(fg, god)
 	fg.moving = true
-	var tw3 := create_tween()
+	var tw3 := beat_tween()
 	tw3.tween_property(god, "position", Vector2(1450, 60), 1.0).set_delay(0.5)
 	tw3.parallel().tween_property(fg, "position", Vector2(1650, 120), 1.8).set_delay(0.8)
 	await narr("When God created the universe, Father Goose chased him.")
@@ -417,7 +438,7 @@ func intro() -> void:
 		bubbles.append(pop_prop("universe", bp, {"radius": randf_range(50.0, 85.0), "color": Color.from_hsv(randf(), 0.5, 1.0)}))
 	god.position = Vector2(-100, 200)
 	god.scale = Vector2(0.5, 0.5)
-	var tw4 := create_tween()
+	var tw4 := beat_tween()
 	for b in bubbles:
 		tw4.tween_property(god, "position", b.position, 0.35)
 	tw4.tween_property(god, "position", Vector2(1450, 100), 0.4)
@@ -461,7 +482,7 @@ func intro() -> void:
 	cg.scale = Vector2(7, 7)
 	cg.modulate.a = 0.0
 	await ui.fade_to(0.0, 0.6)
-	var tw5 := create_tween()
+	var tw5 := beat_tween()
 	tw5.tween_property(cg, "scale", Vector2.ONE, 2.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw5.parallel().tween_property(cg, "modulate:a", 1.0, 1.0)
 	tw5.tween_callback(cg.set.bind("fiery", false))
@@ -836,7 +857,7 @@ func finale() -> void:
 	await girl_says("FINE! FINE! I'll help you fight God! Where even IS God?!")
 	await goose_says("HONK.", "Everywhere. That is the problem.")
 	ui.hide_box()
-	var tw := create_tween()
+	var tw := beat_tween()
 	tw.tween_property(tint, "color", Color(1.0, 0.45, 0.35), 1.5)
 	var fg = spawn_goose(Vector2(640, 300))
 	fg.pitch = 1.0
@@ -856,7 +877,7 @@ func finale() -> void:
 	god.scale = Vector2(0.6, 0.6)
 	fg.heading = (god.position - fg.position).angle()
 	fg.honk()
-	var tw3 := create_tween()
+	var tw3 := beat_tween()
 	tw3.tween_property(god, "position", Vector2(1500, -100), 1.2).set_delay(0.6)
 	await narr("And somewhere, across the Multiverse, God looked over His shoulder... and started running a little faster.")
 	ui.hide_box()

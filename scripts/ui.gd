@@ -113,6 +113,7 @@ func _ready() -> void:
 	body.add_theme_font_size_override("normal_font_size", 22)
 	body.add_theme_font_size_override("italics_font_size", 22)
 	body.add_theme_font_size_override("bold_font_size", 22)
+	body.add_theme_font_size_override("bold_italics_font_size", 22)
 	v.add_child(body)
 	hint = Label.new()
 	hint.text = "SPACE >>"
