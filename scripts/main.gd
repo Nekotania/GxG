@@ -381,7 +381,7 @@ func intro() -> void:
 	await narr("In the beginning, before the dawn of time, when Chaos and Entropy were the only things in existence...")
 
 	var fg = spawn_goose(Vector2(640, 290))
-	fg.pitch = 0.5
+	fg.pitch = 1.0
 	fg.fiery = true
 	fg.heading = PI * 0.5
 	fg.scale = Vector2.ZERO
@@ -433,7 +433,7 @@ func intro() -> void:
 		var kp := Vector2(640 + side * randf_range(230, 540), randf_range(90, 480))
 		var k = spawn_goose(kp)
 		k.npc = true
-		k.pitch = randf_range(1.1, 1.5)
+		k.pitch = randf_range(1.4, 1.8)
 		k.scale = Vector2.ZERO
 		k.bounds = Rect2(60, 60, 1160, 440)
 		var kt := k.create_tween()
@@ -508,7 +508,7 @@ func intro() -> void:
 	await narr("This is the story of how peace was [b]NEVER[/b] an option...")
 	ui.hide_box()
 	ui.show_title("GxG", "G O O S E    G O O S E")
-	SfxS.of().honk(0.5)
+	SfxS.of().honk(1.0)
 	await wait(2.8)
 
 
@@ -546,7 +546,7 @@ func chapter_choosing() -> void:
 	for i in 5:
 		var g = spawn_goose(Vector2(randf_range(150, 850), randf_range(270, 600)))
 		g.npc = true
-		g.pitch = randf_range(0.9, 1.3)
+		g.pitch = randf_range(1.3, 1.7)
 		g.tint = Color(1, 1, 1).darkened(randf_range(0.0, 0.12))
 		g.bounds = Rect2(110, 250, 760, 360)
 		npcs.append(g)
@@ -815,7 +815,7 @@ func _call_the_geese() -> void:
 	for i in 4:
 		var spot := Vector2(randf_range(200, 1080), randf_range(150, 600))
 		var g = spawn_goose(spot)
-		g.pitch = randf_range(1.1, 1.5)
+		g.pitch = randf_range(1.4, 1.8)
 		g.scale = Vector2(6, 6)
 		g.modulate.a = 0.0
 		g.bounds = goose.bounds
@@ -839,7 +839,7 @@ func finale() -> void:
 	var tw := create_tween()
 	tw.tween_property(tint, "color", Color(1.0, 0.45, 0.35), 1.5)
 	var fg = spawn_goose(Vector2(640, 300))
-	fg.pitch = 0.45
+	fg.pitch = 1.0
 	fg.fiery = true
 	fg.z_index = 20
 	fg.heading = PI * 0.5
@@ -864,5 +864,5 @@ func finale() -> void:
 	await narr("This is the story of how peace was [b]NEVER[/b] an option.")
 	ui.hide_box()
 	ui.show_title("GxG", "G O O S E    G O O S E\n\nTHE END...?\n\nPress R to honk again")
-	SfxS.of().honk(0.5)
+	SfxS.of().honk(1.0)
 	chapter = "end"

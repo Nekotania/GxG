@@ -1,8 +1,10 @@
 extends Node
-## Procedural sound effects. No audio files: every honk is hand-synthesized.
+## Sound effects. Honks play sfx/honk.mp3; everything else is synthesized.
 ## Main adds one instance; everything else calls through Sfx.of().
 
 const RATE := 22050.0
+const HONK = preload("res://sfx/honk.mp3")
+const HONK_VOICES := 12
 
 static var instance: Node
 
@@ -10,6 +12,8 @@ var player: AudioStreamPlayer
 var playback: AudioStreamGeneratorPlayback
 var buf := PackedFloat32Array()
 var pos := 0
+var honk_pool: Array[AudioStreamPlayer] = []
+var honk_next := 0
 
 
 static func of() -> Node:
@@ -27,6 +31,11 @@ func _ready() -> void:
 	add_child(player)
 	player.play()
 	playback = player.get_stream_playback()
+	for i in HONK_VOICES:
+		var hp := AudioStreamPlayer.new()
+		hp.stream = HONK
+		add_child(hp)
+		honk_pool.append(hp)
 
 
 func _process(_delta: float) -> void:
@@ -54,21 +63,11 @@ func _mix(samples: PackedFloat32Array) -> void:
 
 
 func honk(p: float = 1.0) -> void:
-	var dur := 0.22 / sqrt(p)
-	var n := int(dur * RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var ph := 0.0
-	for i in n:
-		var k := float(i) / n
-		var f := lerpf(560.0, 400.0, k) * p + sin(i * 0.004) * 6.0
-		ph += f / RATE
-		var fr := ph - floorf(ph)
-		var sq := 1.0 if fr < 0.35 else -1.0
-		var saw := fr * 2.0 - 1.0
-		var env := minf(1.0, k * 25.0) * pow(1.0 - k, 0.6)
-		out[i] = (sq * 0.5 + saw * 0.5) * env * 0.2
-	_mix(out)
+	# Round-robin through the pool so bursts and choirs of geese overlap instead of cutting off.
+	var hp: AudioStreamPlayer = honk_pool[honk_next]
+	honk_next = (honk_next + 1) % honk_pool.size()
+	hp.pitch_scale = p
+	hp.play()
 
 
 func yelp(p: float = 1.0) -> void:

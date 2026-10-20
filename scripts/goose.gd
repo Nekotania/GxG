@@ -15,7 +15,8 @@ var npc := false
 var moving := false
 var fiery := false
 var speed := 230.0
-var pitch := 1.0
+## 1.0 is the unaltered honk.mp3, reserved for Father Goose. His children honk higher.
+var pitch := 1.4
 var tint := Color.WHITE
 var bounds := Rect2(40, 40, 1200, 640)
 var heading := 0.0
